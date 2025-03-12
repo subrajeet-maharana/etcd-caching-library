@@ -14,6 +14,7 @@ require (
 	github.com/coreos/pkg v0.0.0-20240122114842-bbd7aa9bf6fb // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
+	github.com/google/btree v1.1.3 // indirect
 	github.com/google/uuid v1.3.1 // indirect
 	github.com/natefinch/lumberjack v2.0.0+incompatible // indirect
 	go.etcd.io/etcd/api/v3 v3.5.19 // indirect

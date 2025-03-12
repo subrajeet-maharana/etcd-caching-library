@@ -6,36 +6,50 @@ import (
 	"math/rand"
 	"sync"
 	"time"
+
+	"github.com/google/btree"
 )
 
+type Item struct {
+	Key   string
+	Value string
+}
+
 type Cache struct {
-	mu    sync.RWMutex
-	store map[string]string
+	mu   sync.RWMutex
+	tree *btree.BTree
+}
+
+func (a Item) Less(b btree.Item) bool {
+	return a.Key < b.(Item).Key
 }
 
 func NewCache() *Cache {
 	return &Cache{
-		store: make(map[string]string),
+		tree: btree.New(2),
 	}
 }
 
 func (c *Cache) Set(key, value string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	c.store[key] = value
+	c.tree.ReplaceOrInsert(Item{Key: key, Value: value})
 }
 
 func (c *Cache) Get(key string) (string, bool) {
 	c.mu.RLock()
 	defer c.mu.RUnlock()
-	val, found := c.store[key]
-	return val, found
+	item := c.tree.Get(Item{Key: key})
+	if item != nil {
+		return item.(Item).Value, true
+	}
+	return "", false
 }
 
 func (c *Cache) Delete(key string) {
 	c.mu.Lock()
 	defer c.mu.Unlock()
-	delete(c.store, key)
+	c.tree.Delete(Item{Key: key})
 }
 
 func BenchmarkCache(cache *Cache, numReaders, numWriters, iterations int) {
