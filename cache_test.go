@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"sync"
 	"testing"
+	"time"
 )
 
 func TestSetAndGet(t *testing.T) {
@@ -48,4 +50,18 @@ func TestConcurrentAccess(t *testing.T) {
 	}
 
 	wg.Wait()
+}
+
+func TestBenchmarkList(t *testing.T) {
+	cache := NewCache()
+
+	for i := 0; i < 1000; i++ {
+		cache.Set(fmt.Sprintf("Key-%d", i), fmt.Sprintf("Value-%d", i))
+	}
+
+	start := time.Now()
+	cache.List("Key-100", "Key-900")
+	duration := time.Since(start)
+
+	t.Logf("BTree List Query took %v", duration)
 }

@@ -52,6 +52,17 @@ func (c *Cache) Delete(key string) {
 	c.tree.Delete(Item{Key: key})
 }
 
+func (c *Cache) List(start, end string) []Item {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	var result []Item
+	c.tree.AscendRange(Item{Key: start}, Item{Key: end}, func(item btree.Item) bool {
+		result = append(result, item.(Item))
+		return true
+	})
+	return result
+}
+
 func BenchmarkCache(cache *Cache, numReaders, numWriters, iterations int) {
 	var wg sync.WaitGroup
 	start := time.Now()

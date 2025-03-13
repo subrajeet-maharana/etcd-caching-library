@@ -1,8 +1,6 @@
 package main
 
 import (
-	"context"
-	"fmt"
 	"log"
 	"time"
 
@@ -11,7 +9,7 @@ import (
 
 func main() {
 	SetupLogRotation()
-	cache := NewCache()
+	// cache := NewCache()
 
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
@@ -22,7 +20,7 @@ func main() {
 	}
 	defer cli.Close()
 
-	// // <----------------** ONE: Put and Get Method **---------------->
+	// <----------------** ONE: Put and Get Method **---------------->
 	// if _, err = cli.Put(context.TODO(), "myFirstKey", "my First Value"); err != nil {
 	// 	log.Fatal(err)
 	// }
@@ -33,7 +31,7 @@ func main() {
 	// 	log.Printf("Retrieved Key: %s | Value: %s", kv.Key, kv.Value)
 	// }
 
-	// // <----------------** TWO: Watching changing of values **---------------->
+	// <----------------** TWO: Watching changing of values **---------------->
 	// watchChan := cli.Watch(context.Background(), "/foo")
 	// fmt.Println("Watch is on for the key: /foo")
 	// log.Println("Watching key: /foo")
@@ -45,37 +43,39 @@ func main() {
 	// 	}
 	// }
 
-	// // <----------------** THREE: Loop for log rotation checking **---------------->
+	// <----------------** THREE: Loop for log rotation checking **---------------->
 	// for i := 0; i < 100000; i++ {
 	// 	log.Printf("Log Entry #%d: This is a test log entry", i)
 	// }
 
 	// <----------------** FOUR: Cache **---------------->
-	key := "myFirstKey"
+	// key := "myFirstKey"
 
-	for i := 1; i <= 10; i++ {
-		time.Sleep(2 * time.Second)
-		if value, found := cache.Get(key); found {
-			fmt.Printf("[CACHE] Key: %s | Value: %s\n", key, value)
-			log.Printf("[CACHE] Key: %s | Value: %s\n", key, value)
-		} else {
-			resp, err := cli.Get(context.TODO(), key)
-			if err != nil {
-				log.Fatal("Failed to get value from etcd:", err)
-			}
+	// for i := 1; i <= 10; i++ {
+	// 	time.Sleep(2 * time.Second)
+	// 	if value, found := cache.Get(key); found {
+	// 		fmt.Printf("[CACHE] Key: %s | Value: %s\n", key, value)
+	// 		log.Printf("[CACHE] Key: %s | Value: %s\n", key, value)
+	// 	} else {
+	// 		resp, err := cli.Get(context.TODO(), key)
+	// 		if err != nil {
+	// 			log.Fatal("Failed to get value from etcd:", err)
+	// 		}
 
-			for _, kv := range resp.Kvs {
-				fmt.Printf("[ETCD] Key: %s | Value: %s\n", kv.Key, kv.Value)
-				log.Printf("[ETCD] Key: %s | Value: %s\n", kv.Key, kv.Value)
-				cache.Set(key, string(kv.Value))
-			}
-		}
-	}
+	// 		for _, kv := range resp.Kvs {
+	// 			fmt.Printf("[ETCD] Key: %s | Value: %s\n", kv.Key, kv.Value)
+	// 			log.Printf("[ETCD] Key: %s | Value: %s\n", kv.Key, kv.Value)
+	// 			cache.Set(key, string(kv.Value))
+	// 		}
+	// 	}
+	// }
 
 	// <----------------** FIVE: Benchmarking Cache Hits/Miss **---------------->
 	// numReaders := 50
 	// numWriters := 10
 	// iterations := 100
-
 	// BenchmarkCache(cache, numReaders, numWriters, iterations)
+
+	// <----------------** SIX: List using AscendRange **---------------->
+
 }
