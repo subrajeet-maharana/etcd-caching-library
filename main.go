@@ -1,15 +1,30 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"time"
 
 	clientv3 "go.etcd.io/etcd/client/v3"
 )
 
+func PopulateCacheFromEtcd(cache *Cache, cli *clientv3.Client, prefix string) {
+	resp, err := cli.Get(context.TODO(), prefix, clientv3.WithPrefix())
+	if err != nil {
+		log.Fatal("Failed to fetch data from etcd:", err)
+	}
+
+	for _, kv := range resp.Kvs {
+		cache.Set(string(kv.Key), string(kv.Value))
+		fmt.Printf("Cached Key: %s | Value: %s\n", kv.Key, kv.Value)
+	}
+	log.Println("Cache populated from etcd")
+}
+
 func main() {
 	SetupLogRotation()
-	// cache := NewCache()
+	cache := NewCache()
 
 	cli, err := clientv3.New(clientv3.Config{
 		Endpoints:   []string{"localhost:2379", "localhost:22379", "localhost:32379"},
@@ -19,6 +34,8 @@ func main() {
 		log.Fatal("Failed to connect to etcd:", err)
 	}
 	defer cli.Close()
+
+	PopulateCacheFromEtcd(cache, cli, "")
 
 	// <----------------** ONE: Put and Get Method **---------------->
 	// if _, err = cli.Put(context.TODO(), "myFirstKey", "my First Value"); err != nil {
@@ -77,5 +94,11 @@ func main() {
 	// BenchmarkCache(cache, numReaders, numWriters, iterations)
 
 	// <----------------** SIX: List using AscendRange **---------------->
-
+	start := "one"
+	end := "three"
+	items := cache.List(start, end)
+	for _, item := range items {
+		log.Printf("Key: %s | Value: %s\n", item.Key, item.Value)
+		fmt.Printf("Key: %s | Value: %s\n", item.Key, item.Value)
+	}
 }
